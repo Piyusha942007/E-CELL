@@ -1,0 +1,24 @@
+/* src/styles/global.css */
+
+:root {
+    /* (Keep your color and font variables here) */
+    --color-background: #f8f9fa; /* Light background */
+    --color-text: #343a40; /* Dark text */
+    --font-system: Arial, Helvetica, sans-serif; 
+}
+
+/* Ensure the body is visible and fills the screen */
+body {
+    font-family: var(--font-system);
+    background-color: var(--color-background); 
+    color: var(--color-text); 
+    line-height: 1.6;
+    overflow-x: hidden;
+    /* Often necessary to ensure content takes up full height */
+    min-height: 100vh; 
+}
+
+/* Ensure the root div (#root or similar) is not overriding body styles */
+#root {
+    min-height: 100vh;
+}

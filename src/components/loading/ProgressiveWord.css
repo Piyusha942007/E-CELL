@@ -1,0 +1,316 @@
+/* src/components/loading/ProgressiveWord.css
+   Exact recreation of the video: shiny thick grid, three-word animation (INNOVATE / CONNECT / LAUNCH),
+   neon text with flicker/shake, fire/gif burst, and final zoom transition.
+*/
+
+/* -------------------------
+   Theme variables
+   ------------------------- */
+:root {
+  --color-dark-background: #0b0b0b;
+  --color-neon-text: #ffffff;             /* words appear bright white in video */
+  --color-neon-accent: #00f0ff;           /* subtle cyan glow underlay */
+  --color-shadow: rgba(0, 240, 255, 0.75);/* glow color for neon */
+  --color-grid: rgba(255, 255, 255, 0.65);/* thick shiny white grid */
+  --grid-spacing: 64px;                   /* distance between grid lines */
+  --grid-line-size: 2px;                  /* thickness of lines */
+  --font-system: "Poppins", "Arial", sans-serif;
+}
+
+/* -------------------------
+   Loader container
+   ------------------------- */
+#pre-loader {
+  position: fixed;
+  inset: 0; /* top:0; left:0; right:0; bottom:0; */
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-dark-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 9999;
+  /* subtle base noise so grid + background aren't purely black */
+  background-image: radial-gradient(rgba(255,255,255,0.01) 0.5px, transparent 0.5px);
+  background-size: 6px 6px;
+}
+
+/* -------------------------
+   Background grid (main visual)
+   - Two layered gradients for thicker lines
+   - Shiny glow via drop-shadow + an animated diagonal sheen overlay
+   ------------------------- */
+#pre-loader::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  pointer-events: none;
+  z-index: -2;
+
+  /* Create grid with thicker 2px lines */
+  background-size: var(--grid-spacing) var(--grid-spacing);
+  background-image:
+    linear-gradient(to right, var(--color-grid) var(--grid-line-size), transparent var(--grid-line-size)),
+    linear-gradient(to bottom, var(--color-grid) var(--grid-line-size), transparent var(--grid-line-size));
+
+  opacity: 0.9; /* visible and prominent */
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.22)) contrast(120%) saturate(110%);
+
+  /* subtle movement & breathing */
+  animation: grid-flow 40s linear infinite, grid-breathe 10s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+/* sheen overlay: diagonal moving light to make grid look metallic/shiny */
+#pre-loader::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -40%;
+  width: 180%;
+  height: 180%;
+  pointer-events: none;
+  z-index: -1;
+
+  /* angled translucent white band + blur for shine */
+  background: linear-gradient(120deg,
+              rgba(255,255,255,0.0) 0%,
+              rgba(255,255,255,0.06) 30%,
+              rgba(255,255,255,0.18) 50%,
+              rgba(255,255,255,0.06) 70%,
+              rgba(255,255,255,0.0) 100% );
+
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+
+  animation: sheen-move 6s linear infinite;
+}
+
+/* -------------------------
+   Animations for grid
+   ------------------------- */
+@keyframes grid-flow {
+  from { background-position: 0 0; }
+  to   { background-position: calc(var(--grid-spacing) * -10) calc(var(--grid-spacing) * -10); }
+}
+
+@keyframes grid-breathe {
+  0%   { opacity: 0.85; transform: scale(1.00); }
+  50%  { opacity: 0.55; transform: scale(1.02); }
+  100% { opacity: 0.85; transform: scale(1.00); }
+}
+
+/* sheen movement: slide diagonal sheen across the screen */
+@keyframes sheen-move {
+  0%   { transform: translateX(-60%) translateY(-60%) rotate(0deg); opacity: 0.0; }
+  20%  { opacity: 0.75; }
+  50%  { transform: translateX(20%) translateY(20%) rotate(0deg); opacity: 1; }
+  80%  { opacity: 0.4; }
+  100% { transform: translateX(120%) translateY(120%) rotate(0deg); opacity: 0.0; }
+}
+
+/* -------------------------
+   Central text container & words
+   ------------------------- */
+#pre-loader h1 {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 120px; /* space for stacking */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* words */
+#pre-loader h1 span {
+  display: inline-block;
+  font-family: var(--font-system);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--color-neon-text);
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0;
+  transform-origin: center;
+  white-space: nowrap;
+  /* a crisp heavy font feel like video (use fallback if Poppins not available) */
+  font-size: clamp(1.4rem, 4.5vw, 3.8rem);
+}
+
+/* dynamic-word base behavior */
+.dynamic-word {
+  position: relative;
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(.22,.9,.35,1);
+  animation-fill-mode: forwards;
+}
+
+/* small neon underglow / shadow to approximate the subtle cyan tint from the video */
+.dynamic-word::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  filter: blur(12px);
+  background: radial-gradient(circle at 50% 30%, rgba(0,240,255,0.08), transparent 30%);
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* strong white with glowing multi-layer shadows to mimic video */
+.flicker-style {
+  color: var(--color-neon-text);
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.9),
+    0 0 18px var(--color-shadow),
+    0 0 36px rgba(255,255,255,0.06);
+}
+
+/* slight continuous micro-shake + faint flicker to give energy */
+.flicker-style {
+  animation: neon-flicker 0.12s steps(2, end) infinite, micro-shake 0.15s ease-in-out infinite;
+  animation-delay: 1.8s; /* starts after initial reveal to match video timing */
+}
+
+/* neon flicker (fast) */
+@keyframes neon-flicker {
+  0%   { filter: brightness(1.0); opacity: 1; transform: translateY(0); }
+  30%  { filter: brightness(0.7); opacity: 0.85; transform: translateY(-0.6px); }
+  60%  { filter: brightness(1.15); opacity: 1; transform: translateY(0.6px); }
+  100% { filter: brightness(1.0); opacity: 1; transform: translateY(0); }
+}
+
+/* micro shake */
+@keyframes micro-shake {
+  0% { transform: translate(0,0) rotate(0); }
+  25% { transform: translate(1px, -1px) rotate(0.1deg); }
+  50% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+  75% { transform: translate(1px, 0) rotate(0.05deg); }
+  100% { transform: translate(0,0) rotate(0); }
+}
+
+/* -------------------------
+   Specific reveal animations (staggered)
+   These match the exact timing/positions seen in the video:
+   - word-1 moves in from the left and sits left of center
+   - word-2 moves in from the right and sits right of center
+   - word-3 (LAUNCH) scales in center with a pop/explosion timing
+   ------------------------- */
+
+/* INNOVATE (left) */
+.word-1 {
+  position: absolute;
+  left: 25%;   /* stay left of center */
+}
+@keyframes innovate-reveal {
+  0%   { opacity: 0; transform: translate(-40vw, -6vh) scale(0.8); }
+  100% { opacity: 1; transform: translate(-15vw, 0) scale(1); }
+}
+
+/* CONNECT (right) */
+.word-2 {
+  position: absolute;
+  right: 25%;  /* stay right of center */
+}
+@keyframes connect-reveal {
+  0%   { opacity: 0; transform: translate(40vw, 6vh) scale(0.8); }
+  100% { opacity: 1; transform: translate(15vw, 0) scale(1); }
+}
+
+.word-3 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* exact centering */
+}
+
+@keyframes launch-reveal {
+  0%   { opacity: 0; transform: translateY(30vh) scale(0.5); filter: blur(6px); }
+  60%  { opacity: 1; transform: translateY(-2vh) scale(1.08); filter: blur(0px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+}
+
+
+/* responsive adjustments so words keep spacing at small sizes */
+@media (max-width: 900px) {
+  #pre-loader h1 { gap: 1.2rem; }
+  .word-1 { transform-origin: left center; }
+  .word-2 { transform-origin: right center; }
+  #pre-loader h1 span { font-size: clamp(1rem, 6.5vw, 2.6rem); }
+}
+
+/* -------------------------
+   Fire/explosion GIF styling
+   - The video shows a large orange explosion aligned with LAUNCH
+   ------------------------- */
+
+.fire-animation {
+  position: absolute;
+  left: 50%;
+  bottom: 35%;
+  transform: translateX(-50%);
+  width: min(520px, 42vw);
+  max-width: 640px;
+  pointer-events: none;
+
+  z-index: 5;   /* 🔥 below LAUNCH */
+  opacity: 0;
+  animation: fire-burst 1s ease-out forwards;
+}
+
+.word-3.launch {
+  z-index: 10;  /* LAUNCH text always above fire */
+}
+
+/* short burst scale + fade to match video */
+@keyframes fire-burst {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(10vh) scale(0.6) rotate(0deg); filter: blur(0px) saturate(120%); }
+  30%  { opacity: 1; transform: translateX(-50%) translateY(0vh) scale(1.03) rotate(0.5deg); filter: blur(0px) saturate(140%); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(-2vh) scale(0.98) rotate(-0.6deg); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-8vh) scale(0.9) rotate(-0.6deg); }
+}
+
+/* -------------------------
+   Final scene: zooming out / page reveal
+   - In JSX you add `document.body.classList.add('launch-zoom')`
+   - This scales/zooms the loader content out and fades it away
+   ------------------------- */
+.launch-zoom #pre-loader {
+  transition: transform 1.2s cubic-bezier(0.86, 0, 0.07, 1), opacity 0.9s 0.2s;
+  transform-origin: center center;
+  transform: scale(3) translateY(-120vh);
+  opacity: 0;
+}
+
+
+/* -------------------------
+   Small polish: subtle vignette and grain
+   ------------------------- */
+#pre-loader .vignette {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.9) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* -------------------------
+   Accessibility / reduced motion
+   ------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  #pre-loader::after,
+  #pre-loader::before,
+  .dynamic-word,
+  .flicker-style,
+  .fire-animation {
+    animation: none !important;
+    transition: none !important;
+  }
+  #pre-loader::after { opacity: 0.8; }
+}
